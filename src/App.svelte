@@ -1,0 +1,76 @@
+<script>
+	import WinHead from './WinHead.svelte';
+	import Playlist from './Playlist.svelte';
+	import Timeline from './Timeline.svelte';
+</script>
+
+<style>
+	.border-right {
+		border-right: 1px solid #ccc;
+	}
+	.playlist {
+		height: calc(100vh - 5.5rem);
+	}
+	.wrap {
+		display: flex;
+		flex-direction: column;
+		height: calc(100vh - 6rem);
+	}
+	.cover::before {
+		content: '';
+		position: absolute; /* Абсолютное позиционирование */
+		left: 0; right: 0; top: 0; bottom: 0;
+		z-index: -2;
+		background: url("/home/ruslan/WebstormProjects/audio_player/src/m1000x1000.jpeg") top / cover no-repeat;
+		filter: blur(3px) grayscale(.75);
+
+	}
+	.cover::after {
+		content: '';
+		position: absolute; /* Абсолютное позиционирование */
+		left: 0; right: 0; top: 0; bottom: 0;
+		z-index: -1;
+		background: rgba(0,0,0,0.5);
+
+	}
+	.cover {
+		position: relative;
+		flex-grow: 1;
+		flex-shrink: 0;
+		flex-basis: auto;
+		padding: 3rem;
+	}
+	.timeline {
+		height: 100px;
+		flex-grow: 0;
+		flex-shrink: 0;
+		flex-basis: auto;
+	}
+
+</style>
+
+<WinHead/>
+<div class="container-fluid">
+	<div class="row p-3">
+		<div class="col-3 playlist border-right"><Playlist/></div>
+		<div class="col-9 wrap">
+			<div class="cover">
+				<div class="d-flex">
+					<div>
+						<img width="250" class="album_cover" src="/home/ruslan/WebstormProjects/audio_player/src/m1000x1000.jpeg" alt="">
+					</div>
+					<div class="pl-5 my-auto text-white">
+						<h5 class="my-4">Giza Butler</h5>
+						<h6>Sleep</h6>
+						<h6>The Sciences : 2018</h6>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="timeline">
+					<Timeline/>
+			</div>
+		</div>
+	</div>
+</div>
