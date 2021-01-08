@@ -1,3 +1,5 @@
+import FilesStorage from "./FilesStorage";
+
 export default class OpenFiles {
     constructor() {
         this.files = [];
@@ -28,6 +30,7 @@ export default class OpenFiles {
         let open_link = document.getElementById('open_link');
         let file_input = document.getElementById('open_input');
         let event = new MouseEvent('click', {bubbles: true});
+        let storage = new FilesStorage()
         let input_files;
         open_link.onclick = function (e) {
             e.preventDefault();
@@ -35,9 +38,12 @@ export default class OpenFiles {
         }
         file_input.onchange = function () {
             input_files = this.files;
-            console.log(input_files)
+            //console.log(input_files)
             //console.log(`File name: ${file.name}`); // например, my.png
             //console.log(`Last modified: ${file.lastModified}`);
+
+            storage.setToLocalStorage(input_files);
+            storage.getFromLocalStorage();
         }
         this.files.push(input_files);
     }
