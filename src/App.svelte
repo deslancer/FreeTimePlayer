@@ -21,7 +21,7 @@
 		position: absolute; /* Абсолютное позиционирование */
 		left: 0; right: 0; top: 0; bottom: 0;
 		z-index: -2;
-		background: url("/home/ruslan/WebstormProjects/audio_player/src/m1000x1000.jpeg") top / cover no-repeat;
+		background: url("https://www.comunidadeculturaearte.com/wp-content/uploads/2018/04/6958632.jpg") top / cover no-repeat;
 		filter: blur(3px) grayscale(.75);
 
 	}
@@ -57,7 +57,7 @@
 			<div class="cover">
 				<div class="d-flex">
 					<div>
-						<img width="250" class="album_cover" src="/home/ruslan/WebstormProjects/audio_player/src/m1000x1000.jpeg" alt="">
+						<img width="250" class="album_cover" src="https://www.comunidadeculturaearte.com/wp-content/uploads/2018/04/6958632.jpg" alt="">
 					</div>
 					<div class="pl-5 my-auto text-white">
 						<h5 class="my-4">Giza Butler</h5>

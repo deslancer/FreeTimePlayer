@@ -8,12 +8,12 @@ export default class OpenFiles {
         document.addEventListener('drop', (event) => {
             event.preventDefault();
             event.stopPropagation();
-            /*for (const f of event.dataTransfer.files) {
-                console.log(f)
-                // Using the path attribute to get absolute file path
-                console.log('File Path of dragged files: ', f.path)
-            }*/
-            this.files.push(event.dataTransfer.files)
+            let storage = new FilesStorage();
+            let converted = this.filesToArray(event.dataTransfer.files);
+            this.files.push(converted)
+            storage.setToLocalStorage(this.files);
+            storage.getFromLocalStorage();
+            //console.log(this.files)
         });
         document.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -29,25 +29,36 @@ export default class OpenFiles {
     input_file() {
         let open_link = document.getElementById('open_link');
         let file_input = document.getElementById('open_input');
-        let event = new MouseEvent('click', {bubbles: true});
         let storage = new FilesStorage()
-        let input_files;
+        let f_arr = this.filesToArray;
+        let global_array = this.files;
         open_link.onclick = function (e) {
             e.preventDefault();
-            file_input.dispatchEvent(event);
+            file_input.click();
         }
         file_input.onchange = function () {
-            input_files = this.files;
-            //console.log(input_files)
-            //console.log(`File name: ${file.name}`); // например, my.png
-            //console.log(`Last modified: ${file.lastModified}`);
-
-            storage.setToLocalStorage(input_files);
+            let converted = f_arr(this.files);
+            global_array.push(converted)
+            console.log(global_array)
+            storage.setToLocalStorage(global_array);
             storage.getFromLocalStorage();
         }
-        this.files.push(input_files);
     }
-    get FilesArray() {
-        return this.files
+    filesToArray(files){
+        let filesArray = [];
+        let file = {};
+        for(let i = 0; i < files.length; i++){
+            file = {
+                'lastModified'    : files[i].lastModified,
+                'lastModifiedDate': files[i].lastModifiedDate,
+                'name'       : files[i].name,
+                'path'       : files[i].path,
+                'size'       : files[i].size,
+                'type'		 : files[i].type,
+            }
+            //add the file obj to your array
+            filesArray.push(file)
+        }
+        return filesArray
     }
 }
