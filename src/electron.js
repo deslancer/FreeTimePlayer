@@ -8,6 +8,9 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 900,
         height: 680,
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
     let watcher;
     if (process.env.NODE_ENV === 'development') {

@@ -37,6 +37,12 @@ var app = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
@@ -45,6 +51,9 @@ var app = (function () {
     }
     function space() {
         return text(' ');
+    }
+    function empty() {
+        return text('');
     }
     function attr(node, attribute, value) {
         if (value == null)
@@ -296,6 +305,22 @@ var app = (function () {
             dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
+    }
+    function set_data_dev(text, data) {
+        data = '' + data;
+        if (text.wholeText === data)
+            return;
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
+        text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
     }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
@@ -823,82 +848,176 @@ var app = (function () {
 
     const file$1 = "src\\Playlist.svelte";
 
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[1] = list[i];
+    	return child_ctx;
+    }
+
+    // (9:4) {#if files !== null}
+    function create_if_block(ctx) {
+    	let each_1_anchor;
+    	let each_value = /*files*/ ctx[0];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			each_1_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(target, anchor);
+    			}
+
+    			insert_dev(target, each_1_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*files*/ 1) {
+    				each_value = /*files*/ ctx[0];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(each_1_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(9:4) {#if files !== null}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (10:4) {#each files as file}
+    function create_each_block(ctx) {
+    	let li;
+    	let a;
+    	let t0_value = /*file*/ ctx[1].name + "";
+    	let t0;
+    	let t1;
+
+    	const block = {
+    		c: function create() {
+    			li = element("li");
+    			a = element("a");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			attr_dev(a, "target", "_blank");
+    			attr_dev(a, "href", "#");
+    			add_location(a, file$1, 11, 16, 311);
+    			attr_dev(li, "class", "list-group-item");
+    			add_location(li, file$1, 10, 12, 265);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, li, anchor);
+    			append_dev(li, a);
+    			append_dev(a, t0);
+    			append_dev(li, t1);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*files*/ 1 && t0_value !== (t0_value = /*file*/ ctx[1].name + "")) set_data_dev(t0, t0_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(li);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(10:4) {#each files as file}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$1(ctx) {
     	let input;
-    	let t0;
+    	let t;
     	let ul;
-    	let li0;
-    	let t2;
-    	let li1;
-    	let t4;
-    	let li2;
-    	let t6;
-    	let li3;
-    	let t8;
-    	let li4;
+    	let if_block = /*files*/ ctx[0] !== null && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
     			input = element("input");
-    			t0 = space();
+    			t = space();
     			ul = element("ul");
-    			li0 = element("li");
-    			li0.textContent = "Cras justo odio";
-    			t2 = space();
-    			li1 = element("li");
-    			li1.textContent = "Dapibus ac facilisis in";
-    			t4 = space();
-    			li2 = element("li");
-    			li2.textContent = "Morbi leo risus";
-    			t6 = space();
-    			li3 = element("li");
-    			li3.textContent = "Porta ac consectetur ac";
-    			t8 = space();
-    			li4 = element("li");
-    			li4.textContent = "Vestibulum at eros";
+    			if (if_block) if_block.c();
     			attr_dev(input, "class", "form-control");
     			attr_dev(input, "id", "search");
     			attr_dev(input, "type", "search");
     			attr_dev(input, "placeholder", "Search");
     			attr_dev(input, "aria-label", "Search");
-    			add_location(input, file$1, 4, 0, 25);
-    			attr_dev(li0, "class", "list-group-item");
-    			add_location(li0, file$1, 7, 4, 181);
-    			attr_dev(li1, "class", "list-group-item");
-    			add_location(li1, file$1, 8, 4, 235);
-    			attr_dev(li2, "class", "list-group-item");
-    			add_location(li2, file$1, 9, 4, 297);
-    			attr_dev(li3, "class", "list-group-item");
-    			add_location(li3, file$1, 10, 4, 351);
-    			attr_dev(li4, "class", "list-group-item");
-    			add_location(li4, file$1, 11, 4, 413);
+    			add_location(input, file$1, 5, 0, 48);
     			attr_dev(ul, "class", "list-group mt-2 list-group-flush");
-    			add_location(ul, file$1, 6, 0, 130);
+    			add_location(ul, file$1, 7, 0, 153);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
-    			insert_dev(target, t0, anchor);
+    			insert_dev(target, t, anchor);
     			insert_dev(target, ul, anchor);
-    			append_dev(ul, li0);
-    			append_dev(ul, t2);
-    			append_dev(ul, li1);
-    			append_dev(ul, t4);
-    			append_dev(ul, li2);
-    			append_dev(ul, t6);
-    			append_dev(ul, li3);
-    			append_dev(ul, t8);
-    			append_dev(ul, li4);
+    			if (if_block) if_block.m(ul, null);
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			if (/*files*/ ctx[0] !== null) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					if_block.m(ul, null);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(input);
-    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(t);
     			if (detaching) detach_dev(ul);
+    			if (if_block) if_block.d();
     		}
     	};
 
@@ -913,22 +1032,37 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1($$self, $$props) {
+    function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Playlist", slots, []);
-    	const writable_props = [];
+    	let { files } = $$props;
+    	const writable_props = ["files"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Playlist> was created with unknown prop '${key}'`);
     	});
 
-    	return [];
+    	$$self.$$set = $$props => {
+    		if ("files" in $$props) $$invalidate(0, files = $$props.files);
+    	};
+
+    	$$self.$capture_state = () => ({ files });
+
+    	$$self.$inject_state = $$props => {
+    		if ("files" in $$props) $$invalidate(0, files = $$props.files);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [files];
     }
 
     class Playlist extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { files: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -936,6 +1070,21 @@ var app = (function () {
     			options,
     			id: create_fragment$1.name
     		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*files*/ ctx[0] === undefined && !("files" in props)) {
+    			console.warn("<Playlist> was created without expected prop 'files'");
+    		}
+    	}
+
+    	get files() {
+    		throw new Error("<Playlist>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set files(value) {
+    		throw new Error("<Playlist>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
@@ -1193,6 +1342,97 @@ var app = (function () {
     	}
     }
 
+    class FilesStorage {
+        setToLocalStorage(arr) {
+            //save the array to localStorage
+            localStorage.setItem('files',JSON.stringify(arr));
+            //console.log(JSON.stringify(myArray));
+        }
+        getFromLocalStorage() {
+            //console.log(JSON.parse(localStorage.getItem('files')))
+            return JSON.parse(localStorage.getItem('files'))
+        }
+
+    }
+
+    let js_media_tags = require("jsmediatags");
+    class AudioTags {
+        constructor() {
+        }
+        allTags(file){
+            js_media_tags.read(file, {
+                onSuccess: function(tag) {
+                    console.log(tag);
+                },
+                onError: function(error) {
+                    console.log(':(', error.type, error.info);
+                }
+            });
+        }
+    }
+
+    class OpenFiles {
+        constructor() {
+            this.files = [];
+        }
+        drag_n_drop(){
+            document.addEventListener('drop', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                let converted = this.filesToArray(event.dataTransfer.files);
+                this.files.push(converted);
+                //console.log(this.files)
+            });
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            document.addEventListener('dragenter', (event) => {
+                //console.log('File is in the Drop Space');
+            });
+            document.addEventListener('dragleave', (event) => {
+                //console.log('File has left the Drop Space');
+            });
+        }
+        input_file() {
+            let open_link = document.getElementById('open_link');
+            let file_input = document.getElementById('open_input');
+            let f_arr = this.filesToArray;
+            let global_array = this.files;
+            open_link.onclick = function (e) {
+                e.preventDefault();
+                file_input.click();
+            };
+            file_input.onchange = function () {
+                let tags = new AudioTags();
+                tags.allTags(this.files[0]);
+                let converted = f_arr(this.files);
+                global_array.push(converted);
+                //console.log(global_array)
+            };
+        }
+        filesToArray(files){
+            let filesArray = [];
+            let file = {};
+            for(let i = 0; i < files.length; i++){
+                file = {
+                    'lastModified'    : files[i].lastModified,
+                    'lastModifiedDate': files[i].lastModifiedDate,
+                    'name'       : files[i].name,
+                    'path'       : files[i].path,
+                    'size'       : files[i].size,
+                    'type'		 : files[i].type,
+                };
+                //add the file obj to your array
+                filesArray.push(file);
+            }
+            return filesArray
+        }
+        get files_array(){
+            return this.files
+        }
+    }
+
     /* src\App.svelte generated by Svelte v3.29.4 */
     const file$3 = "src\\App.svelte";
 
@@ -1222,7 +1462,12 @@ var app = (function () {
     	let timeline;
     	let current;
     	winhead = new WinHead({ $$inline: true });
-    	playlist = new Playlist({ $$inline: true });
+
+    	playlist = new Playlist({
+    			props: { files: /*newarr*/ ctx[0] },
+    			$$inline: true
+    		});
+
     	timeline = new Timeline({ $$inline: true });
 
     	const block = {
@@ -1252,32 +1497,32 @@ var app = (function () {
     			t8 = space();
     			div5 = element("div");
     			create_component(timeline.$$.fragment);
-    			attr_dev(div0, "class", "col-3 playlist border-right svelte-erq6u3");
-    			add_location(div0, file$3, 54, 2, 1148);
-    			attr_dev(img, "width", "250");
+    			attr_dev(div0, "class", "col-4 playlist border-right svelte-erq6u3");
+    			add_location(div0, file$3, 66, 2, 1515);
+    			attr_dev(img, "width", "200");
     			attr_dev(img, "class", "album_cover");
     			if (img.src !== (img_src_value = "https://www.comunidadeculturaearte.com/wp-content/uploads/2018/04/6958632.jpg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			add_location(img, file$3, 59, 6, 1304);
-    			add_location(div1, file$3, 58, 5, 1291);
+    			add_location(img, file$3, 71, 6, 1688);
+    			add_location(div1, file$3, 70, 5, 1675);
     			attr_dev(h5, "class", "my-4");
-    			add_location(h5, file$3, 62, 6, 1497);
-    			add_location(h60, file$3, 63, 6, 1538);
-    			add_location(h61, file$3, 64, 6, 1560);
+    			add_location(h5, file$3, 74, 6, 1881);
+    			add_location(h60, file$3, 75, 6, 1922);
+    			add_location(h61, file$3, 76, 6, 1944);
     			attr_dev(div2, "class", "pl-5 my-auto text-white");
-    			add_location(div2, file$3, 61, 5, 1452);
+    			add_location(div2, file$3, 73, 5, 1836);
     			attr_dev(div3, "class", "d-flex");
-    			add_location(div3, file$3, 57, 4, 1264);
+    			add_location(div3, file$3, 69, 4, 1648);
     			attr_dev(div4, "class", "cover svelte-erq6u3");
-    			add_location(div4, file$3, 56, 3, 1239);
+    			add_location(div4, file$3, 68, 3, 1623);
     			attr_dev(div5, "class", "timeline svelte-erq6u3");
-    			add_location(div5, file$3, 70, 3, 1633);
-    			attr_dev(div6, "class", "col-9 wrap svelte-erq6u3");
-    			add_location(div6, file$3, 55, 2, 1210);
+    			add_location(div5, file$3, 82, 3, 2017);
+    			attr_dev(div6, "class", "col-8 wrap svelte-erq6u3");
+    			add_location(div6, file$3, 67, 2, 1594);
     			attr_dev(div7, "class", "row p-3");
-    			add_location(div7, file$3, 53, 1, 1123);
+    			add_location(div7, file$3, 65, 1, 1490);
     			attr_dev(div8, "class", "container-fluid");
-    			add_location(div8, file$3, 52, 0, 1091);
+    			add_location(div8, file$3, 64, 0, 1458);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1344,14 +1589,47 @@ var app = (function () {
     function instance$3($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("App", slots, []);
+    	let storage = new FilesStorage();
+    	let files = new OpenFiles().files_array;
+    	let files_from_storage = storage.getFromLocalStorage();
+    	let newarr = [];
+
+    	files_from_storage.forEach(function (item, i, arr) {
+    		item.forEach(function (itm, i, arr) {
+    			newarr.push(itm);
+    		});
+    	});
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ WinHead, Playlist, Timeline });
-    	return [];
+    	$$self.$capture_state = () => ({
+    		WinHead,
+    		Playlist,
+    		Timeline,
+    		FilesStorage,
+    		OpenFiles,
+    		storage,
+    		files,
+    		files_from_storage,
+    		newarr
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("storage" in $$props) storage = $$props.storage;
+    		if ("files" in $$props) files = $$props.files;
+    		if ("files_from_storage" in $$props) files_from_storage = $$props.files_from_storage;
+    		if ("newarr" in $$props) $$invalidate(0, newarr = $$props.newarr);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [newarr];
     }
 
     class App extends SvelteComponentDev {
@@ -1366,82 +1644,6 @@ var app = (function () {
     			id: create_fragment$3.name
     		});
     	}
-    }
-
-    class FilesStorage {
-        setToLocalStorage(arr) {
-            //save the array to localStorage
-            localStorage.setItem('files',JSON.stringify(arr));
-            //console.log(JSON.stringify(myArray));
-        }
-        getFromLocalStorage() {
-            console.log(JSON.parse(localStorage.getItem('files')));
-            return localStorage.getItem('audio_files')
-        }
-
-    }
-
-    class OpenFiles {
-        constructor() {
-            this.files = [];
-        }
-        drag_n_drop(){
-            document.addEventListener('drop', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                let storage = new FilesStorage();
-                let converted = this.filesToArray(event.dataTransfer.files);
-                this.files.push(converted);
-                storage.setToLocalStorage(this.files);
-                storage.getFromLocalStorage();
-                //console.log(this.files)
-            });
-            document.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
-            document.addEventListener('dragenter', (event) => {
-                //console.log('File is in the Drop Space');
-            });
-            document.addEventListener('dragleave', (event) => {
-                //console.log('File has left the Drop Space');
-            });
-        }
-        input_file() {
-            let open_link = document.getElementById('open_link');
-            let file_input = document.getElementById('open_input');
-            let storage = new FilesStorage();
-            let f_arr = this.filesToArray;
-            let global_array = this.files;
-            open_link.onclick = function (e) {
-                e.preventDefault();
-                file_input.click();
-            };
-            file_input.onchange = function () {
-                let converted = f_arr(this.files);
-                global_array.push(converted);
-                console.log(global_array);
-                storage.setToLocalStorage(global_array);
-                storage.getFromLocalStorage();
-            };
-        }
-        filesToArray(files){
-            let filesArray = [];
-            let file = {};
-            for(let i = 0; i < files.length; i++){
-                file = {
-                    'lastModified'    : files[i].lastModified,
-                    'lastModifiedDate': files[i].lastModifiedDate,
-                    'name'       : files[i].name,
-                    'path'       : files[i].path,
-                    'size'       : files[i].size,
-                    'type'		 : files[i].type,
-                };
-                //add the file obj to your array
-                filesArray.push(file);
-            }
-            return filesArray
-        }
     }
 
     const app = new App({

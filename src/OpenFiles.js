@@ -1,5 +1,5 @@
 import FilesStorage from "./FilesStorage";
-
+import AudioTags from "./AudioTags.js"
 export default class OpenFiles {
     constructor() {
         this.files = [];
@@ -11,8 +11,6 @@ export default class OpenFiles {
             let storage = new FilesStorage();
             let converted = this.filesToArray(event.dataTransfer.files);
             this.files.push(converted)
-            storage.setToLocalStorage(this.files);
-            storage.getFromLocalStorage();
             //console.log(this.files)
         });
         document.addEventListener('dragover', (e) => {
@@ -37,11 +35,11 @@ export default class OpenFiles {
             file_input.click();
         }
         file_input.onchange = function () {
+            let tags = new AudioTags();
+            tags.allTags(this.files[0]);
             let converted = f_arr(this.files);
             global_array.push(converted)
-            console.log(global_array)
-            storage.setToLocalStorage(global_array);
-            storage.getFromLocalStorage();
+            //console.log(global_array)
         }
     }
     filesToArray(files){
@@ -60,5 +58,8 @@ export default class OpenFiles {
             filesArray.push(file)
         }
         return filesArray
+    }
+    get files_array(){
+        return this.files
     }
 }

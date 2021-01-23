@@ -5,8 +5,8 @@ export default class FilesStorage {
         //console.log(JSON.stringify(myArray));
     }
     getFromLocalStorage() {
-        console.log(JSON.parse(localStorage.getItem('files')))
-        return localStorage.getItem('audio_files')
+        //console.log(JSON.parse(localStorage.getItem('files')))
+        return JSON.parse(localStorage.getItem('files'))
     }
 
 }

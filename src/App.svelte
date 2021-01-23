@@ -2,6 +2,18 @@
 	import WinHead from './WinHead.svelte';
 	import Playlist from './Playlist.svelte';
 	import Timeline from './Timeline.svelte';
+	import FilesStorage from "./FilesStorage";
+	import OpenFiles from "./OpenFiles";
+	let storage = new FilesStorage()
+	let files = new OpenFiles().files_array
+	let files_from_storage = storage.getFromLocalStorage();
+	let newarr = []
+	files_from_storage.forEach(function(item, i, arr) {
+		item.forEach(function (itm, i, arr) {
+			newarr.push(itm)
+		})
+	});
+
 </script>
 
 <style>
@@ -52,12 +64,12 @@
 <WinHead/>
 <div class="container-fluid">
 	<div class="row p-3">
-		<div class="col-3 playlist border-right"><Playlist/></div>
-		<div class="col-9 wrap">
+		<div class="col-4 playlist border-right"><Playlist files="{newarr}"/></div>
+		<div class="col-8 wrap">
 			<div class="cover">
 				<div class="d-flex">
 					<div>
-						<img width="250" class="album_cover" src="https://www.comunidadeculturaearte.com/wp-content/uploads/2018/04/6958632.jpg" alt="">
+						<img width="200" class="album_cover" src="https://www.comunidadeculturaearte.com/wp-content/uploads/2018/04/6958632.jpg" alt="">
 					</div>
 					<div class="pl-5 my-auto text-white">
 						<h5 class="my-4">Giza Butler</h5>

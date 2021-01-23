@@ -1,13 +1,17 @@
 <script>
+    export let files;
 </script>
 
 
 <input class="form-control" id="search" type="search"
        placeholder="Search" aria-label="Search">
 <ul class="list-group mt-2 list-group-flush">
-    <li class="list-group-item">Cras justo odio</li>
-    <li class="list-group-item">Dapibus ac facilisis in</li>
-    <li class="list-group-item">Morbi leo risus</li>
-    <li class="list-group-item">Porta ac consectetur ac</li>
-    <li class="list-group-item">Vestibulum at eros</li>
+    {#if files !== null}
+    {#each files as file}
+            <li class="list-group-item">
+                <a target="_blank" href="#">{file.name}</a>
+            </li>
+    {/each}
+    <!--<li class="list-group-item">Cras justo odio</li>-->
+    {/if}
 </ul>
